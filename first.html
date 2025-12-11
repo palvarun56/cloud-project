@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Computing Basics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* 1. RESET & BASIC SETUP */
+        * { box-sizing: border-box; }
+        body {
+            background-color: #1e293b; /* Dark blue-slate background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Presentation Wrapper for positioning context */
+        #presentation-wrapper {
+            position: relative;
+            width: 1280px;
+            height: 720px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); /* Stronger shadow for dark theme */
+            border-radius: 20px;
+        }
+
+        /* 2. SLIDE CONTAINER */
+        .slide-container {
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a; /* Deep slate background */
+            border-radius: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px;
+            color: #e2e8f0; /* Light text */
+            
+            /* INTERACTIVITY: Initial state for hidden slides and transition */
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out, visibility 0.5s;
+        }
+
+        /* INTERACTIVITY: Active slide state */
+        .slide-container.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        /* 3. DECORATIVE BACKGROUNDS */
+        .slide-container::before {
+            content: '';
+            position: absolute;
+            top: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 70%); /* Lighter sky blue glow */
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .slide-container > * { z-index: 1; position: relative; }
+
+        /* 4. TYPOGRAPHY */
+        h1 {
+            font-size: 80px;
+            font-weight: 700;
+            color: #f1f5f9; /* Lightest text */
+            margin: 0;
+            line-height: 1.1;
+        }
+        
+        .slide-title {
+            font-size: 48px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 40px;
+            border-left: 8px solid #38bdf8; /* Lighter sky blue accent */
+            padding-left: 24px;
+        }
+
+        h3 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #38bdf8; /* Lighter sky blue */
+            margin: 0 0 16px 0;
+        }
+
+        p, li {
+            font-size: 24px;
+            line-height: 1.6;
+            color: #94a3b8; /* Lighter gray text */
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 20px;
+            padding-left: 36px;
+            position: relative;
+        }
+
+        li::before {
+            content: '\f00c'; /* Checkmark */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #38bdf8;
+            position: absolute;
+            left: 0;
+            top: 4px;
+            font-size: 20px;
+        }
+
+        /* 5. LAYOUTS */
+        .content-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            height: 100%;
+            align-items: center;
+        }
+
+        .two-column.tiled {
+            align-items: stretch;
+        }
+
+        /* Text Tiles */
+        .text-tile {
+            background-color: #1f2937; /* Darker tile background */
+            border: 1px solid #334155; /* Dark border */
+            border-radius: 16px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Image Styling (Conceptual Visuals) */
+        .image-wrapper {
+            width: 100%;
+            height: 450px;
+            border-radius: 16px;
+            overflow: hidden;
+            background-color: transparent; /* Changed to transparent for custom visuals */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Tiled Icons Layout */
+        .icon-tiles {
+            display: flex;
+            gap: 40px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .icon-tile {
+            flex: 1;
+            background-color: #1f2937;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background-color: #334155; /* Dark circle background */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .icon-circle i {
+            font-size: 32px;
+            color: #38bdf8;
+        }
+        
+        /* Highlight Numbers Layout (for Slide 6 Deployment) */
+        .deployment-container {
+             display: grid;
+             grid-template-columns: repeat(3, 1fr);
+             gap: 30px;
+             width: 100%;
+        }
+        .deploy-card {
+            background: #1f2937;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .deploy-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+            color: #a5b4fc; /* Indigo lighter */
+        }
+
+        /* Q&A Layout */
+        .qa-layout {
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* INTERACTIVITY: Navigation Buttons */
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(56, 189, 248, 0.8);
+            color: #0f172a; /* Dark text on button */
+            border: none;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: 700;
+            border-radius: 12px;
+            transition: background-color 0.3s, transform 0.1s;
+            z-index: 10;
+        }
+        
+        .nav-button:hover:not(:disabled) {
+            background-color: #0284c7;
+            color: #fff;
+        }
+        
+        .nav-button:active:not(:disabled) {
+            transform: translateY(-50%) scale(0.98);
+        }
+        
+        .nav-button:disabled {
+            background-color: rgba(56, 189, 248, 0.4);
+            cursor: not-allowed;
+            color: #334155;
+        }
+
+        #prev-button {
+            left: -80px;
+        }
+
+        #next-button {
+            right: -80px;
+        }
+        
+        /* Footer for slide number */
+        #slide-footer {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            font-size: 18px;
+            color: #475569;
+            z-index: 2;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="presentation-wrapper">
+    
+    <!-- Navigation Buttons -->
+    <button id="prev-button" class="nav-button" disabled><i class="fa-solid fa-chevron-left"></i> PREV</button>
+    <button id="next-button" class="nav-button">NEXT <i class="fa-solid fa-chevron-right"></i></button>
+
+    <!-- Slide Number Indicator -->
+    <div id="slide-footer">
+        Slide <span id="current-slide-number">1</span> of <span id="total-slides">10</span>
+    </div>
+
+    <!-- Slide 1: Title -->
+    <div class="slide-container" id="slide1">
+        <div class="content-area" style="align-items: center; text-align: center;">
+            <div style="font-size: 100px; color: #38bdf8; margin-bottom: 20px;"><i class="fa-solid fa-cloud"></i></div>
+            <h1>Cloud Computing<br>Basics</h1>
+            <p style="margin-top: 30px; color: #94a3b8; font-size: 32px;">Everyday Uses & How It Works</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Definition (Simple) -->
+    <div class="slide-container" id="slide2">
+        <h2 class="slide-title">What is Cloud Computing?</h2>
+        <div class="content-area">
+            <div class="two-column tiled">
+                <div class="text-tile">
+                    <h3>The Simple Definition</h3>
+                    <p>It means using computers over the internet.</p>
+                    <p>Instead of storing files on your own hard drive, you store them on a giant server somewhere else.</p>
+                </div>
+                <div class="text-tile">
+                    <h3>Think of it like Electricity</h3>
+                    <p>You don't generate your own electricity at home.</p>
+                    <p>You plug into the grid and pay for what you use.</p>
+                    <p>Cloud is the same—but for computing power.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: The "Cloud" is Physical (Image replaced with icons) -->
+    <div class="slide-container" id="slide3">
+        <h2 class="slide-title">Where is "The Cloud"?</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <h3>It's Not in the Sky!</h3>
+                    <p>The "Cloud" is actually thousands of physical buildings called <strong>Data Centers</strong>.</p>
+                    <ul>
+                        <li>They are filled with rows of powerful computers (servers).</li>
+                        <li>They run 24/7 to keep your data safe and accessible.</li>
+                        <li>They are located all over the world.</li>
+                    </ul>
+                </div>
+                <div class="image-wrapper" style="background-color: #1f2937; display: block; padding: 20px; height: 100%;">
+                    <div style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                        <div style="display: flex; align-items: center;">
+                            <i class="fa-solid fa-server" style="font-size: 150px; color: #60a5fa;"></i>
+                            <i class="fa-solid fa-warehouse" style="font-size: 180px; color: #94a3b8; margin-left: 40px;"></i>
+                        </div>
+                        <p style="font-size: 20px; text-align: center; color: #94a3b8; margin-top: 40px;">Conceptual View: Servers inside a large Facility</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Key Characteristics -->
+    <div class="slide-container" id="slide4">
+        <h2 class="slide-title">Key Features</h2>
+        <div class="content-area">
+            <div class="icon-tiles">
+                <div class="icon-tile">
+                    <div class="icon-circle"><i class="fa-solid fa-hand-pointer"></i></div>
+                    <h3>On-Demand</h3>
+                    <p>Get computing power instantly when you need it. No waiting for hardware to arrive.</p>
+                </div>
+                <div class="icon-tile">
+                    <div class="icon-circle"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+                    <h3>Scalable</h3>
+                    <p>Start small and grow big. Need more storage? Just upgrade your plan instantly.</p>
+                </div>
+                <div class="icon-tile">
+                    <div class="icon-circle"><i class="fa-solid fa-laptop-house"></i></div>
+                    <h3>Accessible</h3>
+                    <p>Access your files and apps from any device (Phone, Laptop, Tablet), anywhere.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Service Models (Image replaced with colored boxes) -->
+    <div class="slide-container" id="slide5">
+        <h2 class="slide-title">Types of Cloud Services</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <div style="margin-bottom: 30px;">
+                        <h3>1. IaaS (Infrastructure)</h3>
+                        <p style="font-size: 20px; margin-left: 20px;">Rent the raw hardware (Servers, Storage).<br><em>Example: Amazon Web Services (AWS)</em></p>
+                    </div>
+                    <div style="margin-bottom: 30px;">
+                        <h3>2. PaaS (Platform)</h3>
+                        <p style="font-size: 20px; margin-left: 20px;">Rent tools to build apps.<br><em>Example: Google App Engine</em></p>
+                    </div>
+                    <div>
+                        <h3>3. SaaS (Software)</h3>
+                        <p style="font-size: 20px; margin-left: 20px;">Rent finished applications.<br><em>Example: Gmail, Netflix</em></p>
+                    </div>
+                </div>
+                <div class="image-wrapper" style="height: auto; background-color: transparent;">
+                    <div style="width: 80%; text-align: center; color: #0f172a; font-weight: 600; font-size: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
+                        <div style="background: #ef4444; padding: 25px 15px; border-radius: 12px 12px 0 0;">
+                            <i class="fa-solid fa-envelope" style="margin-right: 10px;"></i> SaaS (You Manage Only Data)
+                        </div>
+                        <div style="background: #f97316; padding: 25px 15px;">
+                            <i class="fa-solid fa-wrench" style="margin-right: 10px;"></i> PaaS (You Manage Code)
+                        </div>
+                        <div style="background: #3b82f6; padding: 25px 15px; border-radius: 0 0 12px 12px;">
+                            <i class="fa-solid fa-database" style="margin-right: 10px;"></i> IaaS (You Manage Operating System)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Deployment Models -->
+    <div class="slide-container" id="slide6">
+        <h2 class="slide-title">Deployment Models</h2>
+        <div class="content-area">
+            <div class="deployment-container">
+                <div class="deploy-card">
+                    <div class="deploy-icon"><i class="fa-solid fa-bus"></i></div>
+                    <h3 style="color: #60a5fa;">Public Cloud</h3>
+                    <p>Shared by many people (Like a public bus).</p>
+                    <p style="font-size: 18px; color: #64748b;">Cheap & Easy.</p>
+                </div>
+                <div class="deploy-card">
+                    <div class="deploy-icon"><i class="fa-solid fa-car"></i></div>
+                    <h3 style="color: #c084fc;">Private Cloud</h3>
+                    <p>Dedicated to one company (Like your own car).</p>
+                    <p style="font-size: 18px; color: #64748b;">Secure & Expensive.</p>
+                </div>
+                <div class="deploy-card">
+                    <div class="deploy-icon"><i class="fa-solid fa-taxi"></i></div>
+                    <h3 style="color: #fcd34d;">Hybrid Cloud</h3>
+                    <p>A mix of both (Like a taxi).</p>
+                    <p style="font-size: 18px; color: #64748b;">Flexible & Balanced.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Everyday Examples (Image replaced with icons) -->
+    <div class="slide-container" id="slide7">
+        <h2 class="slide-title">You Use Cloud Every Day!</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <ul>
+                        <li><strong>Streaming:</strong> Netflix streams movies from the cloud, not your TV.</li>
+                        <li><strong>Storage:</strong> Google Photos keeps your memories safe online.</li>
+                        <li><strong>Social Media:</strong> Instagram posts are stored on cloud servers.</li>
+                        <li><strong>Music:</strong> Spotify plays millions of songs without downloading them.</li>
+                    </ul>
+                </div>
+                <div class="image-wrapper" style="background-color: #1f2937; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="font-size: 120px; color: #38bdf8; margin-bottom: 20px;"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <div style="display: flex; gap: 40px; color: #94a3b8;">
+                        <i class="fa-solid fa-mobile-screen-button" style="font-size: 80px;"></i>
+                        <i class="fa-solid fa-laptop" style="font-size: 80px;"></i>
+                        <i class="fa-solid fa-tablet-screen-button" style="font-size: 80px;"></i>
+                    </div>
+                    <p style="font-size: 20px; text-align: center; color: #94a3b8; margin-top: 20px;">Access from Any Device</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Benefits -->
+    <div class="slide-container" id="slide8">
+        <h2 class="slide-title">Why Switch to Cloud?</h2>
+        <div class="content-area">
+            <div class="deployment-container">
+                <div class="deploy-card" style="border-left: 5px solid #22c55e;">
+                    <div class="deploy-icon" style="color:#22c55e;"><i class="fa-solid fa-piggy-bank"></i></div>
+                    <h3>Save Money</h3>
+                    <p style="font-size: 20px;">No need to buy expensive supercomputers. Just pay a small monthly fee.</p>
+                </div>
+                <div class="deploy-card" style="border-left: 5px solid #f59e0b;">
+                    <div class="deploy-icon" style="color:#f59e0b;"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>Data Safety</h3>
+                    <p style="font-size: 20px;">If you lose your laptop, you don't lose your data. It's safe in the cloud.</p>
+                </div>
+                <div class="deploy-card" style="border-left: 5px solid #6366f1;">
+                    <div class="deploy-icon" style="color:#6366f1;"><i class="fa-solid fa-users"></i></div>
+                    <h3>Collaboration</h3>
+                    <p style="font-size: 20px;">Teams can work on the same document at the same time (e.g., Google Docs).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Risks (Image replaced with icons) -->
+    <div class="slide-container" id="slide9">
+        <h2 class="slide-title">Risks & Challenges</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <h3>1. Internet Dependency</h3>
+                    <p>If your internet goes down, you might lose access to your files.</p>
+                    <br>
+                    <h3>2. Security & Privacy</h3>
+                    <p>You are trusting a third party (like Google or Amazon) to keep your data safe.</p>
+                    <br>
+                    <h3>3. Cost Management</h3>
+                    <p>It's easy to accidentally leave servers running and get a big bill.</p>
+                </div>
+                <div class="image-wrapper" style="background-color: #1f2937; height: 100%; display: flex; justify-content: space-around; align-items: center; padding: 20px;">
+                    <div style="text-align: center;">
+                        <i class="fa-solid fa-plug-circle-xmark" style="font-size: 90px; color: #ef4444;"></i>
+                        <p style="font-size: 22px; color: #94a3b8; margin-top: 10px;">Internet Loss</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <i class="fa-solid fa-user-lock" style="font-size: 90px; color: #f97316;"></i>
+                        <p style="font-size: 22px; color: #94a3b8; margin-top: 10px;">Trust Required</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <i class="fa-solid fa-credit-card" style="font-size: 90px; color: #60a5fa;"></i>
+                        <p style="font-size: 22px; color: #94a3b8; margin-top: 10px;">Unexpected Bills</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Summary -->
+    <div class="slide-container" id="slide10">
+        <div class="qa-layout">
+            <h1 style="color: #38bdf8; font-size: 60px; margin-bottom: 20px;">To Summarize</h1>
+            <p style="max-width: 900px; text-align: center; font-size: 30px; color: #e2e8f0;">Cloud computing is simply <strong>renting computing power</strong> over the internet.</p>
+            <p style="margin-top: 40px; color: #94a3b8;">It makes technology cheaper, faster, and accessible to everyone.</p>
+            
+            <div style="margin-top: 80px; font-size: 24px; color: #e2e8f0;">
+                Thank you! Any Questions?
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript for Interactive Slideshow Navigation
+    const slides = document.querySelectorAll('.slide-container');
+    const totalSlides = slides.length;
+    let currentSlideIndex = 0;
+
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    const currentSlideNumber = document.getElementById('current-slide-number');
+    const totalSlidesDisplay = document.getElementById('total-slides');
+
+    // Set the total number of slides on load
+    totalSlidesDisplay.textContent = totalSlides;
+
+    /**
+     * Updates the visibility of slides and the state of navigation buttons.
+     * @param {number} index The index of the slide to show.
+     */
+    function showSlide(index) {
+        if (index < 0 || index >= totalSlides) return;
+
+        // 1. Hide current active slide (if any)
+        slides.forEach(slide => {
+            slide.classList.remove('active');
+        });
+
+        // 2. Show the new active slide
+        slides[index].classList.add('active');
+        currentSlideIndex = index;
+
+        // 3. Update button states
+        prevButton.disabled = currentSlideIndex === 0;
+        nextButton.disabled = currentSlideIndex === totalSlides - 1;
+
+        // 4. Update slide number footer
+        currentSlideNumber.textContent = currentSlideIndex + 1;
+    }
+
+    /** Moves to the previous slide. */
+    function prevSlide() {
+        showSlide(currentSlideIndex - 1);
+    }
+
+    /** Moves to the next slide. */
+    function nextSlide() {
+        showSlide(currentSlideIndex + 1);
+    }
+
+    // Attach event listeners
+    prevButton.addEventListener('click', prevSlide);
+    nextButton.addEventListener('click', nextSlide);
+
+    // Keyboard navigation (optional, but great for interactivity)
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowLeft') {
+            prevSlide();
+        } else if (event.key === 'ArrowRight') {
+            nextSlide();
+        }
+    });
+
+    // Initialize the first slide on load
+    window.onload = () => {
+        showSlide(0);
+    };
+
+</script>
+
+</body>
+</html>
